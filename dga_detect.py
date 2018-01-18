@@ -37,6 +37,7 @@ from sklearn.metrics import recall_score
 from tflearn.layers.recurrent import bidirectional_rnn, BasicLSTMCell
 from sklearn.externals import joblib
 from pandas.io.parsers import read_csv
+import csv
 
 class dga_dect():
     def __init__(self, feature, method):
@@ -54,18 +55,6 @@ class dga_dect():
         self.feature = feature
         self.method = method
     
-    def load_file(self, filepath):
-        '''
-        data = pd.read_csv(filepath, sep=",",header=None)
-        x=[i[1] for i in data.values]
-        return x
-        '''
-        x=[]
-        data = pd.read_csv(filepath, sep="\t", header=None,
-                       skiprows=18)
-        x=[i[1] for i in data.values]
-        domain = sample(x, 10000)
-        return domain
         
     def get_feature_charseq(self, domains):
         t=[]
@@ -135,15 +124,19 @@ class dga_dect():
         x = CV.fit_transform(domains)
         return x.toarray()
     
-    def predict(self, filepath):
+    def predict_Webnames(self, Webnames, filewriter):
+        #Transform webname into domain form, etg:"google.com" --> "google"
+        domains = []
+        for net in Webnames:
+            domain = ''
+            for elem in net:
+                if elem != '.':
+                    domain = domain + elem
+                else:
+                    break
+            domains = domains + [domain]
         
-        #load domains
-        domains = self.load_file(filepath)
-        
-        #tranfrom the domain names to given features: 'textfeature','2-gram','234-gram' or 'charseq'
-        
-        name = self.feature + '&' + self.method +'.model'
-        
+        #Characterize the domains
         if  self.feature == 'textfeature':
             x = self.get_feature(domains)
         if self.feature == '2-gram':
@@ -176,19 +169,48 @@ class dga_dect():
                     os._exit(0)
         else:
             y_pred = model.predict(x)
+            
+        #Transform outcome '0'&'1' into more comprehesive form 'Alexa'&'DGA' 
+        pred = []
+        for elem in y_pred:
+            if elem == 0:
+                pred = pred + ['Alexa']
+            else:
+                pred = pred + ['DGA']
         
-        return y_pred
+        #Write the prediction in to the outcome file 
+        outcome = [Webnames,pred]
+        rows = np.transpose(outcome)
+        for row in rows:
+            filewriter.writerow(row)
+        
+    
+    def predict(self, filepath):
+        
+        #First create an empty outcome file with only the column names
+        with open('dga_dect_outcome.csv', 'wb') as dga_detect_outcome:
+            filewriter = csv.writer(dga_detect_outcome, delimiter=',',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            filewriter.writerow(['Webname', 'DGA or Alexa'])        
+        
+        #Update the outcome file using 'predict_domains' function every 100 domains
+        count = 0
+        fp = open(filepath,"rb")
+        Webnames = []
+        for line in fp: 
+            if len(Webnames) > 100:
+                self.predict_Webnames(Webnames, filewriter)
+                Webnames=[]
+            Webnames.append(line)
+        self.predict_Webnames(Webnames)
+        
+        
 
 if __name__ == "__main__":
     
     dga_test = dga_dect('2-gram', 'svm')
     dgapath = "../data/dga/dga.txt"
-    pred = dga_test.predict(dgapath)
-    print pred[1:100]
+    dga_test.predict(dgapath)
+    outcome = pd.read_csv('dga_detect_outcome.csv', header = True, sep = ',')
+    print sample(outcome, 100)
     
-    '''
-    type = pd.DataFrame([[1]])
-    type.to_csv("../data/dga/kmeans_type.csv",index=False)
-    label = pd.read_csv("../data/dga/kmeans_type.csv")
-    print label.values[0][0]
-    '''
