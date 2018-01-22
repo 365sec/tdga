@@ -202,7 +202,7 @@ class dga_dect():
                 self.predict_Webnames(Webnames, filewriter)
                 Webnames=[]
             Webnames.append(line)
-        self.predict_Webnames(Webnames)
+        self.predict_Webnames(Webnames, filewriter)
         
         
 
