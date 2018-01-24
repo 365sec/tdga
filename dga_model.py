@@ -41,8 +41,8 @@ from pandas.core.frame import DataFrame
 
 random_state = 170
 
-dga_file="../data/dga/dga.txt"
-alexa_file="../data/dga/top-1m.csv"
+dga_file="../data/dga.txt"
+alexa_file="../data/top-1m.csv"
 
 def load_alexa():
     x=[]
@@ -59,7 +59,7 @@ def load_alexa():
             else:
                 break
         domain = domain + [domain_name]
-        if k > 10000:
+        if k > 100000:
             break
     return domain
 
@@ -68,7 +68,7 @@ def load_dga():
     data = pd.read_csv(dga_file, sep="\t", header=None,
                        skiprows=18)
     x=[i[1] for i in data.values]
-    domain = sample(x,10000)
+    domain = sample(x,100000)
     return domain
 
 def get_feature_charseq():
@@ -198,7 +198,7 @@ def do_rnn(trainX, trainY):
               batch_size=10,run_id="dga",n_epoch=1)
 
     return model
-    
+
 
 def do_SVM(x, y):
     clf = svm.SVC(kernel='rbf', C=1).fit(x, y)
@@ -215,70 +215,68 @@ def do_kmeans(x, y):
     score2 = accuracy_score(y, y_pred2)
     if score1 > score2:
         type = pd.DataFrame([[1]])
-        type.to_csv("../data/dga/kmeans_type.csv",index=False)
+        type.to_csv("../data/kmeans_type.csv",index=False)
         return model
     else:
         type = pd.DataFrame([[2]])
-        type.to_csv("../data/dga/kmeans_type.csv",index=False)
+        type.to_csv("../data/kmeans_type.csv",index=False)
         return model
-    
+
 if __name__ == "__main__":
-    
+
     print "Hello dga"
-    print "234-gram & mlp"
-    x, y = get_feature_234gram()
-    model1 = do_mlp(x, y)
-    joblib.dump(model1,'234-gram&mlp.model')
-    
+
     print "text feature & nb"
     x, y = get_feature()
     model2 = do_nb(x, y)
     joblib.dump(model2, 'textfeature&nb.model')
-    
+
     print "text feature & xgboost"
     x, y = get_feature()
     model3 = do_xgboost(x, y)
     joblib.dump(model3, 'textfeature&xgboost.model')
-    
+
     print "text feature & mlp"
     x, y = get_feature()
     model4 = do_mlp(x, y)
     joblib.dump(model4, 'textfeature&mlp.model')
-    
-    print "charseq & rnn"
-    x, y = get_feature_charseq()
-    model5 = do_rnn(x, y)
-    joblib.dump(model5, 'charseq&rnn.model')
-    
+
     print "2-gram & mlp"
     x, y = get_feature_2gram()
     model6 = do_mlp(x, y)
     joblib.dump(model6, '2-gram&mlp.model')
-    
+
     print "2-gram & XGBoost"
     x, y = get_feature_2gram()
     model7 = do_xgboost(x, y)
     joblib.dump(model7, '2-gram&xgboost.model')
-    
+
     print "2-gram & nb"
     x, y=get_feature_2gram()
     model8 = do_nb(x, y)
     joblib.dump(model8, '2-gram&nb.model')
-    
+
     print "2-gram & SVM"
     x, y=get_feature_2gram()
     model9 = do_SVM(x, y)
     joblib.dump(model9, '2-gram&svm.model')
-    
+
     print "text feature & svm"
     x, y = get_feature()
     model10 = do_SVM(x, y)
     joblib.dump(model10, 'textfeature&svm.model')
-    
+
     print "text feature & kmeans"
     x, y = get_feature()
     model11 = do_kmeans(x, y)
     joblib.dump(model11, 'textfeature&kmeans.model')
-    
-    
-  
+
+    print "234-gram & mlp"
+    x, y = get_feature_234gram()
+    model1 = do_mlp(x, y)
+    joblib.dump(model1,'234-gram&mlp.model')
+
+    print "charseq & rnn"
+    x, y = get_feature_charseq()
+    model5 = do_rnn(x, y)
+    joblib.dump(model5, 'charseq&rnn.model')

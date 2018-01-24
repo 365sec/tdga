@@ -36,21 +36,22 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from tflearn.layers.recurrent import bidirectional_rnn, BasicLSTMCell
 from sklearn.externals import joblib
+import time
 
 
 random_state = 170
 
-dga_file="../data/dga/dga.txt"
-alexa_file="../data/dga/top-1m.csv"
+dga_file="../data/dga.txt"
+alexa_file="../data/top-1m.csv"
 
 def load_alexa():
     x=[]
     data = pd.read_csv(alexa_file, sep=",",header=None)
     x=[i[1] for i in data.values]
     domain = []
-    k = 0
+    #k = 0
     for net in x:
-        k = k + 1
+        #k = k + 1
         domain_name = ''
         for elem in net:
             if elem != '.':
@@ -58,8 +59,8 @@ def load_alexa():
             else:
                 break
         domain = domain + [domain_name]
-        if k > 10000:
-            break
+        #if k > 100000:
+            #break
     return domain
 
 def load_dga():
@@ -67,8 +68,9 @@ def load_dga():
     data = pd.read_csv(dga_file, sep="\t", header=None,
                        skiprows=18)
     x=[i[1] for i in data.values]
-    domain = sample(x, 10000)
-    return domain
+    #domain  = sample (x, 100000)
+    #return domain
+    return x
 
 def get_feature_charseq():
     alexa=load_alexa()
@@ -247,33 +249,34 @@ def do_kmeans(x_train, x_test, y_train, y_test):
     else:
         print(classification_report(y_test, y_pred2))
         print metrics.confusion_matrix(y_test, y_pred2)
-    
-if __name__ == "__main__":
-    
 
-    
+if __name__ == "__main__":
+    start = time.clock()
+
+
+
     '''
     print "Hello dga"
     print "234-gram & mlp"
     x_train, x_test, y_train, y_test = get_feature_234gram()
     do_mlp(x_train, x_test, y_train, y_test)
-    
+    '''
     print "text feature & nb"
     x_train, x_test, y_train, y_test = get_feature()
     do_nb(x_train, x_test, y_train, y_test)
-    
+    '''
     print "text feature & xgboost"
     x_train, x_test, y_train, y_test = get_feature()
     do_xgboost(x_train, x_test, y_train, y_test)
-      
+
     print "text feature & mlp"
     x_train, x_test, y_train, y_test = get_feature()
     do_mlp(x_train, x_test, y_train, y_test)
-    
+
     print "charseq & rnn"
     x_train, x_test, y_train, y_test = get_feature_charseq()
     do_rnn(x_train, x_test, y_train, y_test)
-    
+
     print "2-gram & mlp"
     x_train, x_test, y_train, y_test = get_feature_2gram()
     do_mlp(x_train, x_test, y_train, y_test)
@@ -284,16 +287,18 @@ if __name__ == "__main__":
     print "2-gram & nb"
     x_train, x_test, y_train, y_test=get_feature_2gram()
     do_nb(x_train, x_test, y_train, y_test)
-    
+
     print "2-gram & SVM"
     x_train, x_test, y_train, y_test=get_feature_2gram()
     do_SVM(x_train, x_test, y_train, y_test)
-    
+
     print "text feature & kmeans"
     x_train, x_test, y_train, y_test = get_feature()
     do_kmeans(x_train, x_test, y_train, y_test)
-    
+
     print "text feature & svm"
     x_train, x_test, y_train, y_test = get_feature()
     do_SVM(x_train, x_test, y_train, y_test)
     '''
+    end = time.clock()
+    print str(end-start)
