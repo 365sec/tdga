@@ -40,18 +40,7 @@ from pandas.io.parsers import read_csv
 import csv
 from optparse import OptionParser
 
-parser = OptionParser()
-parser.add_option("-i", "--input",dest="input", action="store", type="string",
-                   help="input file for predict dga domains" )
-parser.add_option("-o", "--output", dest="output" ,action="store", type="string",
-                   help='output file for dga domains')
-parser.add_option('-f', '--feature', dest='feature', type='choice',
-                   choices=['2-gram', '234-gram', 'charseq'], default=None,
-                   help='feature ....')
-parser.add_option('-m', '--method', dest='method', type='choice',
-                   choices=['kmeans', 'mlp', 'rnn','svm'], default=None,
-                   help='method ....')
-options, args = parser.parse_args()
+
 
 class dga_dect():
     def __init__(self, feature, method):
@@ -229,7 +218,18 @@ class dga_dect():
 
 if __name__ == "__main__":
 
-
+    parser = OptionParser()
+    parser.add_option("-i", "--input",dest="input", action="store", type="string",
+                       help="input file for predict dga domains" )
+    parser.add_option("-o", "--output", dest="output" ,action="store", type="string",
+                       help='output file for dga domains')
+    parser.add_option('-f', '--feature', dest='feature', type='choice',
+                       choices=['2-gram', '234-gram', 'charseq'], default=None,
+                       help='feature ....')
+    parser.add_option('-m', '--method', dest='method', type='choice',
+                       choices=['kmeans', 'mlp', 'rnn','svm'], default=None,
+                       help='method ....')
+    options, args = parser.parse_args()
 
 
     dga_test = dga_dect(options.feature, options.method)
