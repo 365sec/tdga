@@ -1,4 +1,10 @@
 # tdga
+ 
+注意 ：如需安装最新版的TensorFlow ,gcc 的版本应该大于等于 7.2.0
+查看 gcc版本命令
+root@debian:/home/ml# gcc --version
+gcc (GCC)  7.2.0
+
 
 已经安装好的第三方库
 apt-get install python-dev 
